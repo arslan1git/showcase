@@ -1,57 +1,53 @@
 import { auth } from "@/auth";
 import { client } from "@/sanity/lib/client";
-import { AUTHOR_BY_ID_QUERY } from "@/sanity/lib/queries";
+import { STARTUP_BY_ID_QUERY } from "@/sanity/lib/queries";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import UserStartups from "@/components/UserStartups";
-import { Suspense } from "react";
-import { StartupCardSkeleton } from "@/components/StartupCard";
+import View from "@/components/View";
+import Link from "next/link";
+import { formatDate } from "@/lib/utils";
+import Markdown from "react-markdown";
 
-export const experimental_ppr = true;
+export const dynamic = "force-dynamic";
 
-const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const id = (await params).id;
+const Page = async ({ params }: { params: { id: string } }) => {
   const session = await auth();
-
-  const user = await client.fetch(AUTHOR_BY_ID_QUERY, { id });
-  if (!user) return notFound();
+  const startup = await client.fetch(STARTUP_BY_ID_QUERY, { id: params.id });
+  
+  if (!startup) return notFound();
 
   return (
-    <>
-      <section className="profile_container">
-        <div className="profile_card">
-          <div className="profile_title">
-            <h3 className="text-24-black uppercase text-center line-clamp-1">
-              {user.name}
-            </h3>
+    <section className="flex flex-col gap-10 max-w-7xl mx-auto px-5 py-10">
+      <div className="flex justify-center items-center">
+        <div>
+          <h1 className="text-30-bold">{startup.title}</h1>
+        </div>
+        
+        <View id={startup._id} />
+      </div>
+          <div className="flex items-center gap-3 mt-2">
+            <Link href={`/user/${startup.author?._id}`}>
+              <p className="text-16-medium">{startup.author?.name}</p>
+            </Link>
+            <p className="text-14-normal">{formatDate(startup._createdAt)}</p>
           </div>
 
-          <Image
-            src={user.image}
-            alt={user.name}
-            width={220}
-            height={220}
-            className="profile_image"
-          />
+          <p className="text-16-medium">{startup.description}</p>
+      <Image 
+        src={startup.image}
+        alt={startup.title}
+        width={1200}
+        height={600}
+        className="rounded-xl object-cover"
+      />
 
-          <p className="text-30-extrabold mt-7 text-center">
-            @{user?.username}
-          </p>
-          <p className="mt-1 text-center text-14-normal">{user?.bio}</p>
+      <div className="flex flex-col gap-5">
+        
+        <div className="prose max-w-none">
+          <Markdown>{startup.pitch}</Markdown>
         </div>
-
-        <div className="flex-1 flex flex-col gap-5 lg:-mt-5">
-          <p className="text-30-bold">
-            {session?.id === id ? "Your" : "All"} Startups
-          </p>
-          <ul className="card_grid-sm">
-            <Suspense fallback={<StartupCardSkeleton />}>
-              <UserStartups id={id} />
-            </Suspense>
-          </ul>
-        </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 };
 
