@@ -68,20 +68,76 @@ export const handleFormSubmit = async (
 };
 
 export async function createPitch(prevState: any, formData: FormData, pitch: string) {
-  try {
-    // Here you would typically:
-    // 1. Process the form data
-    // 2. Save to your database
-    // 3. Return result
-    
-    return {
-      status: "SUCCESS",
-      _id: "some-generated-id" // Replace with actual ID from your database
-    };
-  } catch (error) {
+  const session = await auth();
+
+  if (!session) {
     return {
       status: "ERROR",
-      error: "Failed to create pitch"
+      error: "Not authenticated"
+    };
+  }
+
+  try {
+    const { title, description, category } = Object.fromEntries(formData);
+    const image = formData.get("link") as string;
+
+    const slug = slugify(title as string, { lower: true, strict: true });
+
+    const project = {
+      _type: "startup",
+      title,
+      description,
+      category,
+      image,
+      slug: {
+        _type: "slug",
+        current: slug,
+      },
+      author: {
+        _type: "reference",
+        _ref: session.id,
+      },
+      pitch,
+      views: 0
+    };
+
+    const result = await writeClient.create(project);
+
+    return {
+      status: "SUCCESS",
+      _id: result._id
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: "ERROR",
+      error: "Failed to create project"
+    };
+  }
+}
+
+export async function deleteProject(projectId: string) {
+  const session = await auth();
+
+  if (!session) {
+    return {
+      status: "ERROR",
+      error: "Not authenticated"
+    };
+  }
+
+  try {
+    await writeClient.delete(projectId);
+
+    return {
+      status: "SUCCESS",
+      message: "Project deleted successfully"
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: "ERROR",
+      error: "Failed to delete project"
     };
   }
 }

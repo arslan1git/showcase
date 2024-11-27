@@ -28,13 +28,13 @@ export default async function Home({
 
         <div className="relative text-center space-y-8 max-w-5xl mx-auto px-4">
           <h1 className="text-5xl md:text-7xl font-bold leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
-            Share Your Projects,
-            <span className="block">Inspire Others</span>
+            Showcase Your Code,
+            <span className="block">Build Your Future</span>
           </h1>
 
           <p className="text-xl md:text-2xl max-w-2xl mx-auto text-blue-50/90 leading-relaxed">
-            Join our community of learners, showcase your progress, and connect
-            with peers who share your passion for growth.
+            Join our community of developers, share your innovative projects, and connect
+            with fellow coders who are shaping the future of technology.
           </p>
 
           <div className="mt-8">
@@ -45,17 +45,21 @@ export default async function Home({
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <p className="text-2xl font-semibold text-white mb-6">
-          {query ? `Search results for "${query}"` : "All Startups"}
+          {query ? `Search results for "${query}"` : "All Projects"}
         </p>
 
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts?.length > 0 ? (
             posts.map((post: StartupTypeCard) => (
-              <StartupCard key={post?._id} post={post} />
+              <StartupCard 
+                key={post?._id} 
+                post={post} 
+                isOwner={session?.id === post.author?._id}
+              />
             ))
           ) : (
             <p className="text-gray-500 text-lg col-span-full text-center py-12">
-              No startups found. Be the first to share your project!
+              No projects found. Be the first to share your project!
             </p>
           )}
         </ul>

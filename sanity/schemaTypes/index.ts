@@ -1,7 +1,6 @@
-import { type SchemaTypeDefinition } from 'sanity'
+import { project } from './project'
 import { author } from './author'
-import { startup } from './proj'
 
-export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [author, startup],
+export const schema = {
+  types: [project, author],
 }
