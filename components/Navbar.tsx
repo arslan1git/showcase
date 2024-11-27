@@ -8,56 +8,78 @@ const Navbar = async () => {
   const session = await auth();
 
   return (
-    <header className="px-5 py-3 bg-white shadow-sm font-work-sans">
-      <nav className="flex justify-between items-center">
-        <Link href="/">
-          <Image src="/logo.png" alt="logo" width={144} height={30} />
-        </Link>
+    <header className="bg-gradient-to-r from-black/90 to-gray-900/90 dark:from-black/90 dark:to-gray-900/90 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-200/20 dark:border-gray-700/20 supports-[backdrop-filter]:bg-black/90">
+      <div className="container mx-auto px-4 max-w-8xl">
+        <nav className="flex items-center justify-between h-16">
+          <Link href="/" className="flex items-center gap-2 transition-all hover:opacity-80 group">
+            <Image 
+              src="/Code.png" 
+              alt="logo" 
+              width={40} 
+              height={40} 
+              className="rounded-full object-contain transition-transform group-hover:scale-105" 
+            />
+            <span className="text-white font-semibold text-lg underline underline-offset-4 decoration-transparent hover:decoration-white transition-colors">
+              Student Showcase
+            </span>
+          </Link>
 
-        <div className="flex items-center gap-5 text-black">
-          {session && session?.user ? (
-            <>
-              <Link href="/startups/create">
-                <span className="max-sm:hidden">Create</span>
-                <BadgePlus className="size-6 sm:hidden" />
-              </Link>
+          <div className="flex items-center gap-5 text-gray-700 dark:text-gray-200">
+            {session && session?.user ? (
+              <>
+                <Link 
+                  href="/startups/create"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-400 hover:opacity-90 text-white transition-all"
+                >
+                  <BadgePlus className="size-5" />
+                  <span className="max-sm:hidden">Create</span>
+                </Link>
 
+                <form
+                  action={async () => {
+                    "use server";
+                    await signOut({ redirectTo: "/" });
+                  }}
+                >
+                  <button 
+                    type="submit"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-red-400 hover:opacity-90 text-white transition-all"
+                  >
+                    <LogOut className="size-5" />
+                    <span className="max-sm:hidden">Logout</span>
+                  </button>
+                </form>
+
+                <Link href={`/user/${session?.id}`}>
+                  <Avatar className="size-10 ring-2 ring-transparent hover:ring-primary transition-all">
+                    <AvatarImage
+                      src={session?.user?.image || ""}
+                      alt={session?.user?.name || ""}
+                    />
+                    <AvatarFallback className="bg-gray-100 dark:bg-gray-800">
+                      AV
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              </>
+            ) : (
               <form
                 action={async () => {
                   "use server";
-
-                  await signOut({ redirectTo: "/" });
+                  await signIn("github");
                 }}
               >
-                <button type="submit">
-                  <span className="max-sm:hidden">Logout</span>
-                  <LogOut className="size-6 sm:hidden text-red-500" />
+                <button 
+                  type="submit"
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-white hover:opacity-90 text-black transition-all"
+                >
+                  Login
                 </button>
               </form>
-
-              <Link href={`/user/${session?.id}`}>
-                <Avatar className="size-10">
-                  <AvatarImage
-                    src={session?.user?.image || ""}
-                    alt={session?.user?.name || ""}
-                  />
-                  <AvatarFallback>AV</AvatarFallback>
-                </Avatar>
-              </Link>
-            </>
-          ) : (
-            <form
-              action={async () => {
-                "use server";
-
-                await signIn("github");
-              }}
-            >
-              <button type="submit">Login</button>
-            </form>
-          )}
-        </div>
-      </nav>
+            )}
+          </div>
+        </nav>
+      </div>
     </header>
   );
 };

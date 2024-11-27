@@ -5,10 +5,9 @@ import { parseServerActionResponse } from "./utils";
 import slugify from "slugify";
 import { writeClient } from "@/sanity/lib/write-client";
 
-export const createPitch = async (
+export const handleFormSubmit = async (
   state: any,
-  form: FormData,
-  pitch: string,
+  formData: FormData,
 ) => {
   const session = await auth();
 
@@ -18,20 +17,30 @@ export const createPitch = async (
       status: "ERROR",
     });
 
-  const { title, description, category, link } = Object.fromEntries(
-    Array.from(form).filter(([key]) => key !== "pitch"),
-  );
+  const { title, description, category } = Object.fromEntries(formData);
+  const imageFile = formData.get("image") as File;
+  const pitch = formData.get("pitch") as string;
+
+  if (!imageFile) {
+    return parseServerActionResponse({
+      error: "Image is required",
+      status: "ERROR",
+    });
+  }
 
   const slug = slugify(title as string, { lower: true, strict: true });
 
   try {
+    // Upload image to Sanity
+    const imageAsset = await writeClient.assets.upload('image', imageFile);
+
     const startup = {
       title,
       description,
       category,
-      image: link,
+      image: imageAsset.url,
       slug: {
-        _type: slug,
+        _type: "slug",
         current: slug,
       },
       author: {
@@ -57,3 +66,22 @@ export const createPitch = async (
     });
   }
 };
+
+export async function createPitch(prevState: any, formData: FormData, pitch: string) {
+  try {
+    // Here you would typically:
+    // 1. Process the form data
+    // 2. Save to your database
+    // 3. Return result
+    
+    return {
+      status: "SUCCESS",
+      _id: "some-generated-id" // Replace with actual ID from your database
+    };
+  } catch (error) {
+    return {
+      status: "ERROR",
+      error: "Failed to create pitch"
+    };
+  }
+}
